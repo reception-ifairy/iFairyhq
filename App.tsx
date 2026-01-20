@@ -49,6 +49,8 @@ import { CurriculumPage } from './pages/CurriculumPage';
 import { VisionPage } from './pages/VisionPage';
 import { MissionPage } from './pages/MissionPage';
 import { PurposePage } from './pages/PurposePage';
+import { CreativePage } from './pages/CreativePage';
+import { MathPage } from './pages/MathPage';
 import { curriculumKeys } from './curriculumData';
 import { aboutMenu } from './siteNav';
 
@@ -252,6 +254,10 @@ const App: React.FC = () => {
   if (pathname === '/about') return <AboutPage config={appConfig} />;
 
   if (pathname === '/curriculum') return <CurriculumPage config={appConfig} />;
+
+  if (pathname === '/creative') return <CreativePage />;
+
+  if (pathname === '/math') return <MathPage />;
 
   if (pathname === '/purpose') return <PurposePage config={appConfig} />;
 

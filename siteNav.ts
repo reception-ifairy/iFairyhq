@@ -10,6 +10,8 @@ export const aboutMenu: NavItem[] = [
 export const primaryNav: NavItem[] = [
   { to: '/', label: 'Home' },
   { to: '/curriculum', label: 'Curriculum' },
+  { to: '/creative', label: 'Creative' },
+  { to: '/math', label: 'Math' },
   { to: '/admin', label: 'Admin' },
 ];
 

@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iFAIRY STUDIO | The Safe AI Universe for Kids</title>
+    
+    <!-- Fonts: Inter (UI) & Playfair Display (Headings) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        slate: { 950: '#020617', 900: '#0f172a' },
+                        amber: { 450: '#f59e0b' }, // Custom gold
+                        fairy: { 
+                            dark: '#0f0518',
+                            glow: '#d8b4fe'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out 3s infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'spin-slow': 'spin 12s linear infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slight': 'bounce 2s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px #f59e0b33' },
+                            '100%': { boxShadow: '0 0 20px #f59e0b88, 0 0 10px #f59e0b' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- CORE STYLES --- */
+        body {
+            background-color: #020617;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor for custom one */
+        }
+        
+        /* Custom Cursor */
+        #cursor-dot, #cursor-outline {
+            position: fixed;
+            top: 0; left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        #cursor-dot { width: 8px; height: 8px; background-color: #f59e0b; }
+        #cursor-outline { 
+            width: 40px; height: 40px; 
+            border: 1px solid rgba(245, 158, 11, 0.5); 
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        body:hover #cursor-outline { width: 30px; height: 30px; }
+        a:hover ~ #cursor-outline, button:hover ~ #cursor-outline, .cursor-hover:hover ~ #cursor-outline, input:hover ~ #cursor-outline, select:hover ~ #cursor-outline, .slide-btn:hover ~ #cursor-outline {
+            background-color: rgba(245, 158, 11, 0.1);
+            transform: translate(-50%, -50%) scale(1.5);
+            border-color: #f59e0b;
+        }
+
+        /* Canvas Background */
+        #magic-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Utilities */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 0%, #fbbf24 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Scroll Reveal */
+        .reveal-target {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-target.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Chat Scrollbar */
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+        /* Typing Dot Animation */
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Accordion transition */
+        .accordion-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.active {
+            opacity: 1;
+        }
+
+        /* Color Picker Active State */
+        .color-btn.active {
+            transform: scale(1.2);
+            border-color: white;
+        }
+        .size-btn.active {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Sound Wave Animation */
+        .sound-wave {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 40px;
+        }
+        .bar {
+            width: 4px;
+            background: #f472b6;
+            animation: sound 1s infinite ease-in-out;
+        }
+        @keyframes sound {
+            0%, 100% { height: 10%; }
+            50% { height: 100%; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- CUSTOM CURSOR -->
+    <div id="cursor-dot" class="hidden md:block"></div>
+    <div id="cursor-outline" class="hidden md:block transition-all duration-300"></div>
+
+    <!-- BACKGROUND CANVAS -->
+    <canvas id="magic-canvas"></canvas>
+
+    <!-- NAVIGATION -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-500 py-6 border-b border-transparent bg-slate-950/50 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <!-- Brand -->
+            <a href="#" class="flex items-center gap-3 group z-50">
+                <div class="relative w-10 h-10">
+                    <div class="absolute inset-0 bg-amber-500 blur-lg opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                    <div class="relative w-full h-full bg-gradient-to-br from-amber-300 to-amber-600 rounded-lg flex items-center justify-center text-slate-950 shadow-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    </div>
+                </div>
+                <span class="text-2xl font-serif font-bold tracking-tight text-white group-hover:text-amber-400 transition-colors">iFAIRY</span>
+            </a>
+
+            <!-- Desktop Links -->
+            <div class="hidden md:flex gap-8 text-sm font-medium tracking-wide text-slate-300 items-center">
+                <a href="#create" class="hover:text-amber-400 transition-colors">Create</a>
+                <a href="#dreams" class="hover:text-amber-400 transition-colors">Stories</a>
+                <a href="#companions" class="hover:text-amber-400 transition-colors">Companions</a>
+                <a href="#pricing" class="hover:text-amber-400 transition-colors">Pricing</a>
+                <button onclick="scrollToSection('companions')" class="px-6 py-2.5 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black border border-white/10 transition-all duration-300 font-bold text-sm backdrop-blur-md">
+                    Launch App
+                </button>
+            </div>
+
+            <!-- Mobile Toggle -->
+            <button id="mobile-menu-btn" class="md:hidden text-white z-50">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 z-40 bg-slate-950 flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-opacity duration-300">
+        <a href="#create" class="text-3xl font-serif text-white hover:text-amber-500 mobile-link">Create</a>
+        <a href="#dreams" class="text-3xl font-serif text-white hover:text-amber-500 mobile-link">Stories</a>
+        <a href="#companions" class="text-3xl font-serif text-white hover:text-amber-500 mobile-link">Companions</a>
+        <a href="#pricing" class="text-3xl font-serif text-white hover:text-amber-500 mobile-link">Pricing</a>
+        <button onclick="document.getElementById('mobile-menu').classList.remove('opacity-100', 'pointer-events-auto')" class="absolute top-8 right-8 text-slate-500">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        <!-- Glowing Orbs -->
+        <div class="absolute top-20 right-0 w-[500px] h-[500px] bg-amber-600/10 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[120px] animate-float-delayed"></div>
+
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center relative z-10">
+            <!-- Text Content -->
+            <div class="text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 mb-8 animate-fade-in-up">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span class="text-xs font-bold tracking-widest uppercase text-amber-300">New: Voice Mode 2.0</span>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-bold leading-[1.1] mb-8 font-serif text-white">
+                    Unlock the Magic of <br/>
+                    <span class="gradient-text">Safe Discovery.</span>
+                </h1>
+                
+                <p class="text-lg md:text-xl text-slate-400 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                    The first AI-powered universe designed to protect childhood while expanding imagination. No ads. No toxicity. Just pure wonder.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <button onclick="scrollToSection('companions')" class="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-bold rounded-xl shadow-[0_0_40px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center gap-2">
+                        <span>Meet the Fairies</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </button>
+                    <button class="px-8 py-4 glass-panel text-white font-bold rounded-xl hover:bg-white/10 transition-colors flex items-center justify-center gap-2 group">
+                        <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+                        </div>
+                        Watch Demo
+                    </button>
+                </div>
+
+                <div class="mt-12 flex items-center justify-center lg:justify-start gap-6 text-sm text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <svg class="text-green-500 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>COPPA Compliant</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="text-green-500 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>End-to-End Safe</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Visual -->
+            <div class="relative hidden lg:block">
+                <div class="relative w-full aspect-square max-w-lg mx-auto">
+                    <!-- Central Card -->
+                    <div class="absolute inset-0 bg-slate-900 border border-amber-500/30 rounded-3xl shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-700 flex flex-col overflow-hidden z-20">
+                        <div class="h-1/2 bg-gradient-to-b from-blue-900 to-slate-900 relative p-6">
+                            <div class="w-16 h-16 bg-blue-500 rounded-full blur-[40px] absolute top-10 left-10"></div>
+                            <div class="relative z-10 flex justify-between items-start">
+                                <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-2xl">🧚‍♀️</div>
+                                <div class="px-3 py-1 rounded-full bg-black/30 text-xs font-mono text-blue-300 border border-blue-500/30">AI Active</div>
+                            </div>
+                        </div>
+                        <div class="h-1/2 p-6 flex flex-col justify-end">
+                            <div class="space-y-3">
+                                <div class="w-3/4 h-3 bg-slate-800 rounded animate-pulse"></div>
+                                <div class="w-1/2 h-3 bg-slate-800 rounded animate-pulse delay-75"></div>
+                                <div class="w-full h-3 bg-slate-800 rounded animate-pulse delay-150"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Elements -->
+                    <div class="absolute -top-10 -right-10 w-40 h-40 glass-panel rounded-2xl z-30 animate-float flex items-center justify-center flex-col gap-2 shadow-2xl">
+                        <span class="text-4xl">🛡️</span>
+                        <span class="text-xs font-bold text-green-400 uppercase">100% Safe</span>
+                    </div>
+                    <div class="absolute -bottom-5 -left-10 w-48 h-20 glass-panel rounded-xl z-30 animate-float-delayed flex items-center gap-4 px-4 shadow-2xl">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-500"></div>
+                        <div>
+                            <div class="text-xs text-slate-400">New Story</div>
+                            <div class="text-sm font-bold text-white">The Moon Dragon</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE STATS STRIP -->
+    <div class="border-y border-white/5 bg-slate-950/50 backdrop-blur-sm relative z-20">
+        <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div class="reveal-target">
+                <div class="text-3xl font-serif font-bold text-white mb-1">10k+</div>
+                <div class="text-xs uppercase tracking-widest text-slate-500">Families</div>
+            </div>
+            <div class="reveal-target" style="transition-delay: 100ms">
+                <div class="text-3xl font-serif font-bold text-white mb-1">500k</div>
+                <div class="text-xs uppercase tracking-widest text-slate-500">Questions Answered</div>
+            </div>
+            <div class="reveal-target" style="transition-delay: 200ms">
+                <div class="text-3xl font-serif font-bold text-white mb-1">99.9%</div>
+                <div class="text-xs uppercase tracking-widest text-slate-500">Safety Score</div>
+            </div>
+            <div class="reveal-target" style="transition-delay: 300ms">
+                <div class="text-3xl font-serif font-bold text-white mb-1">Zero</div>
+                <div class="text-xs uppercase tracking-widest text-slate-500">Ads Shown</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW SECTION: MAGIC SKETCHPAD & TOOLS CAROUSEL -->
+    <section id="create" class="py-24 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col items-center">
+            <div class="text-center mb-10 reveal-target">
+                <span class="text-amber-400 font-bold tracking-widest uppercase text-xs mb-2 block">The Imagination Lab</span>
+                <h2 class="text-3xl md:text-5xl font-serif font-bold text-white mb-4">Create Magic</h2>
+                <p class="text-slate-400">Swipe to discover powerful AI tools designed for kids.</p>
+            </div>
+            
+            <!-- Carousel Container -->
+            <div class="relative w-full max-w-5xl">
+                <!-- Navigation Buttons -->
+                <button onclick="slideCreate(-1)" class="slide-btn absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-30 p-3 rounded-full bg-slate-800/80 text-white hover:bg-amber-500 hover:text-black transition-all border border-white/10 backdrop-blur-md">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button onclick="slideCreate(1)" class="slide-btn absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-30 p-3 rounded-full bg-slate-800/80 text-white hover:bg-amber-500 hover:text-black transition-all border border-white/10 backdrop-blur-md">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+
+                <!-- Track -->
+                <div class="overflow-hidden rounded-3xl shadow-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm">
+                    <div id="create-track" class="flex transition-transform duration-500 ease-out" style="transform: translateX(0%);">
+                        
+                        <!-- SLIDE 1: SKETCHPAD -->
+                        <div class="w-full flex-shrink-0 p-4 md:p-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl">🎨</div>
+                                    <h3 class="text-xl font-bold text-white">Stardust Sketchpad</h3>
+                                </div>
+                                <span class="text-xs font-mono text-slate-500 uppercase border border-slate-700 px-2 py-1 rounded">Vision API</span>
+                            </div>
+                            <div class="relative w-full aspect-[16/9] bg-slate-900 rounded-2xl border border-white/5 overflow-hidden group cursor-crosshair">
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity duration-500" id="draw-hint">
+                                    <span class="text-slate-600 font-serif text-xl italic">Start Drawing Here...</span>
+                                </div>
+                                <canvas id="sketchpad" class="absolute inset-0 w-full h-full z-10"></canvas>
+                                <!-- AI Analysis Overlay -->
+                                <div id="sketch-overlay" class="absolute inset-0 z-30 bg-black/80 backdrop-blur-sm flex items-center justify-center p-8 opacity-0 pointer-events-none transition-opacity duration-500">
+                                    <div class="max-w-lg text-center">
+                                        <div class="w-16 h-16 bg-amber-500 rounded-full mx-auto mb-4 flex items-center justify-center animate-bounce">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                                        </div>
+                                        <h3 class="text-2xl font-bold text-white mb-2">The Fairies Say...</h3>
+                                        <p id="sketch-result-text" class="text-lg text-amber-300 font-serif italic leading-relaxed">"Analyzing your masterpiece..."</p>
+                                        <button onclick="closeSketchOverlay()" class="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-bold text-white transition-colors">Draw Again</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Controls -->
+                            <div class="mt-4 flex flex-col md:flex-row gap-4 justify-between items-center">
+                                <div class="flex gap-2 items-center bg-slate-950 p-1.5 rounded-full border border-white/5">
+                                    <button onclick="setBrushColor('#fbbf24', this)" class="color-btn active w-6 h-6 rounded-full bg-amber-400 border border-transparent hover:scale-110 transition-transform"></button>
+                                    <button onclick="setBrushColor('#60a5fa', this)" class="color-btn w-6 h-6 rounded-full bg-blue-400 border border-transparent hover:scale-110 transition-transform"></button>
+                                    <button onclick="setBrushColor('#f472b6', this)" class="color-btn w-6 h-6 rounded-full bg-pink-400 border border-transparent hover:scale-110 transition-transform"></button>
+                                    <button onclick="setBrushColor('#4ade80', this)" class="color-btn w-6 h-6 rounded-full bg-green-400 border border-transparent hover:scale-110 transition-transform"></button>
+                                    <button onclick="setBrushColor('#ffffff', this)" class="color-btn w-6 h-6 rounded-full bg-white border border-transparent hover:scale-110 transition-transform"></button>
+                                </div>
+                                <div class="flex gap-3">
+                                     <button onclick="clearSketchpad()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-red-900/50 hover:text-red-300 transition-colors text-xs font-bold border border-white/5">Clear</button>
+                                     <button onclick="downloadSketch()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-white/10 hover:text-white transition-colors text-xs font-bold border border-white/5" title="Save Drawing">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                     </button>
+                                     <button onclick="analyzeSketch()" id="analyze-btn" class="px-6 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 rounded-lg hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all text-xs font-bold flex items-center gap-2">
+                                         <span>Read the Stars ✨</span>
+                                     </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 2: MELODY WEAVER (Simulated) -->
+                        <div class="w-full flex-shrink-0 p-4 md:p-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center text-xl">🎵</div>
+                                    <h3 class="text-xl font-bold text-white">Melody Weaver</h3>
+                                </div>
+                                <span class="text-xs font-mono text-slate-500 uppercase border border-slate-700 px-2 py-1 rounded">Interactive Demo</span>
+                            </div>
+                            <div class="relative w-full aspect-[16/9] bg-slate-900 rounded-2xl border border-white/5 flex flex-col items-center justify-center p-8 overflow-hidden">
+                                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/sound-waves.png')]"></div>
+                                
+                                <div id="melody-visual" class="relative z-10 w-24 h-24 rounded-full bg-pink-600/20 flex items-center justify-center mb-6 transition-all duration-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-pink-400"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                                </div>
+                                
+                                <!-- Audio Visualizer (Hidden by default) -->
+                                <div id="melody-waves" class="sound-wave hidden mb-6 relative z-10">
+                                    <div class="bar" style="animation-delay: 0s"></div>
+                                    <div class="bar" style="animation-delay: 0.2s"></div>
+                                    <div class="bar" style="animation-delay: 0.4s"></div>
+                                    <div class="bar" style="animation-delay: 0.1s"></div>
+                                    <div class="bar" style="animation-delay: 0.3s"></div>
+                                </div>
+
+                                <h4 id="melody-status" class="relative z-10 text-2xl font-serif text-white mb-2 transition-all">Turn Feelings into Music</h4>
+                                <p class="relative z-10 text-slate-400 text-center max-w-md mb-6">Describe a mood or a story, and listen as the AI composes a unique symphony just for you.</p>
+                                <div class="relative z-10 flex gap-2 w-full max-w-sm">
+                                    <input id="melody-input" type="text" class="flex-grow bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-white text-sm focus:border-pink-500 outline-none cursor-text" placeholder="e.g., A happy robot dancing...">
+                                    <button onclick="simulateMelody()" class="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors cursor-hover">Compose</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 3: ECO-GENESIS (Simulated) -->
+                        <div class="w-full flex-shrink-0 p-4 md:p-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center text-xl">🌱</div>
+                                    <h3 class="text-xl font-bold text-white">Eco-Genesis</h3>
+                                </div>
+                                <span class="text-xs font-mono text-slate-500 uppercase border border-slate-700 px-2 py-1 rounded">Interactive Demo</span>
+                            </div>
+                            <div class="relative w-full aspect-[16/9] bg-slate-900 rounded-2xl border border-white/5 flex flex-col items-center justify-center p-8 overflow-hidden transition-colors duration-1000" id="eco-world">
+                                <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                                
+                                <div id="eco-icon" class="relative z-10 w-24 h-24 rounded-full bg-green-600/20 flex items-center justify-center mb-6 transition-all duration-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-green-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M8 11h8"/><path d="M12 11v4"/></svg>
+                                </div>
+                                <h4 id="eco-status" class="relative z-10 text-2xl font-serif text-white mb-2">Build Living Worlds</h4>
+                                <p class="relative z-10 text-slate-400 text-center max-w-md mb-6">Plant digital seeds, control the weather, and watch an AI-simulated ecosystem evolve in real-time.</p>
+                                <div class="relative z-10 flex gap-4">
+                                    <button onclick="simulateEco('sun')" class="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 hover:border-yellow-500 hover:text-yellow-500 flex items-center justify-center text-xl transition-all cursor-hover">☀️</button>
+                                    <button onclick="simulateEco('rain')" class="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 hover:border-blue-500 hover:text-blue-500 flex items-center justify-center text-xl transition-all cursor-hover">🌧️</button>
+                                    <button onclick="simulateEco('tree')" class="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 hover:border-green-500 hover:text-green-500 flex items-center justify-center text-xl transition-all cursor-hover">🌳</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <!-- Dots -->
+                <div class="flex justify-center gap-2 mt-6">
+                    <button onclick="goToSlide(0)" id="dot-0" class="w-2 h-2 rounded-full bg-amber-500 transition-all"></button>
+                    <button onclick="goToSlide(1)" id="dot-1" class="w-2 h-2 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
+                    <button onclick="goToSlide(2)" id="dot-2" class="w-2 h-2 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: DREAM WEAVER & RIDDLE REALM -->
+    <section id="dreams" class="py-24 relative bg-slate-900/30">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12">
+                <!-- DREAM WEAVER -->
+                <div class="glass-panel p-8 rounded-3xl border border-purple-500/20 reveal-target relative overflow-hidden group">
+                    <div class="absolute -top-20 -right-20 w-60 h-60 bg-purple-500/10 rounded-full blur-3xl"></div>
+                    
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center text-white text-2xl shadow-lg">🌙</div>
+                        <div>
+                            <h3 class="text-2xl font-serif font-bold text-white">Dream Weaver</h3>
+                            <p class="text-sm text-purple-300">Magical Bedtime Story Generator</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 relative z-10">
+                        <div>
+                            <label class="text-xs uppercase font-bold text-slate-500 mb-1 block">Hero's Name</label>
+                            <input type="text" id="dream-name" class="w-full bg-black/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-purple-500 focus:outline-none transition-colors" placeholder="e.g. Leo">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs uppercase font-bold text-slate-500 mb-1 block">Setting</label>
+                                <select id="dream-setting" class="w-full bg-black/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-purple-500 focus:outline-none transition-colors appearance-none cursor-pointer">
+                                    <option>Outer Space</option>
+                                    <option>Enchanted Forest</option>
+                                    <option>Underwater City</option>
+                                    <option>Dinosaur Valley</option>
+                                    <option>Candy Kingdom</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs uppercase font-bold text-slate-500 mb-1 block">Sidekick</label>
+                                <select id="dream-sidekick" class="w-full bg-black/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-purple-500 focus:outline-none transition-colors appearance-none cursor-pointer">
+                                    <option>Robot</option>
+                                    <option>Talking Dragon</option>
+                                    <option>Wise Owl</option>
+                                    <option>Friendly Ghost</option>
+                                    <option>Flying Puppy</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button onclick="weaveDream()" id="dream-btn" class="w-full py-4 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-bold text-white hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all flex items-center justify-center gap-2">
+                            <span>Weave Story ✨</span>
+                        </button>
+
+                        <div id="dream-output" class="hidden mt-6 bg-slate-950/50 rounded-xl p-6 border border-white/5 animate-fade-in-up">
+                            <h4 class="text-purple-300 font-bold mb-2 text-sm uppercase tracking-wider">Your Story</h4>
+                            <p id="dream-text" class="text-slate-300 leading-relaxed text-sm"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIDDLE REALM -->
+                <div class="glass-panel p-8 rounded-3xl border border-teal-500/20 reveal-target relative overflow-hidden group">
+                     <div class="absolute -top-20 -left-20 w-60 h-60 bg-teal-500/10 rounded-full blur-3xl"></div>
+                     
+                     <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-teal-600 flex items-center justify-center text-white text-2xl shadow-lg">🧩</div>
+                        <div>
+                            <h3 class="text-2xl font-serif font-bold text-white">The Riddle Realm</h3>
+                            <p class="text-sm text-teal-300">Challenge your mind</p>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10 flex flex-col h-full justify-between min-h-[300px]">
+                        <div id="riddle-display" class="bg-black/40 rounded-xl p-6 border border-slate-700 mb-4 flex-grow flex items-center justify-center text-center">
+                            <p id="riddle-text" class="text-slate-300 italic">"Click the button below to summon a riddle from the ether..."</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div id="riddle-input-area" class="hidden opacity-0 transition-opacity duration-500">
+                                <div class="flex gap-2">
+                                    <input type="text" id="riddle-guess" class="flex-grow bg-black/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-teal-500 focus:outline-none" placeholder="Your answer...">
+                                    <button onclick="checkRiddle()" id="check-btn" class="px-6 bg-slate-800 hover:bg-teal-600 text-white rounded-xl font-bold transition-colors">Check</button>
+                                </div>
+                                <p id="riddle-feedback" class="text-center text-sm mt-2 font-bold min-h-[20px]"></p>
+                            </div>
+
+                            <button onclick="generateRiddle()" id="riddle-btn" class="w-full py-4 bg-gradient-to-r from-teal-600 to-emerald-600 rounded-xl font-bold text-white hover:shadow-[0_0_20px_rgba(20,184,166,0.4)] transition-all">
+                                Summon Riddle 🎲
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SAFETY SHIELD SECTION -->
+    <section id="safety" class="py-32 relative overflow-hidden">
+        <div class="absolute inset-0 bg-blue-900/5 -skew-y-3 transform origin-top-left z-0"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="lg:w-1/2 reveal-target">
+                    <span class="text-blue-400 font-bold tracking-widest uppercase text-xs mb-2 block">The Guardian Mesh</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 font-serif">A Firewall for <br/>Innocence.</h2>
+                    <p class="text-slate-400 text-lg leading-relaxed mb-8">
+                        Most AI is trained on the open internet—the good, the bad, and the ugly. 
+                        iFairy uses a proprietary <strong>3-Layer Filtering System</strong> that intercepts every query and response.
+                    </p>
+                    
+                    <ul class="space-y-6">
+                        <li class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">1</div>
+                            <div>
+                                <h4 class="text-white font-bold text-lg">Input Sanitization</h4>
+                                <p class="text-sm text-slate-500">Blocks personal info sharing (PII) and inappropriate keywords instantly.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">2</div>
+                            <div>
+                                <h4 class="text-white font-bold text-lg">Contextual Tone Check</h4>
+                                <p class="text-sm text-slate-500">AI re-reads its own answer to ensure kindness and age-appropriate language.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">3</div>
+                            <div>
+                                <h4 class="text-white font-bold text-lg">Parental Override</h4>
+                                <p class="text-sm text-slate-500">You define the topics. Toggle "Science Only" or "Story Mode" in settings.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="lg:w-1/2 relative reveal-target">
+                    <!-- Shield Graphic -->
+                    <div class="relative w-full aspect-square max-w-md mx-auto">
+                        <div class="absolute inset-0 border border-blue-500/30 rounded-full animate-pulse"></div>
+                        <div class="absolute inset-4 border border-blue-500/20 rounded-full"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="glass-panel p-8 rounded-2xl w-full max-w-sm relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-blue-500"></div>
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex items-center gap-3 opacity-50">
+                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                                        <div class="h-2 bg-slate-700 rounded w-24"></div>
+                                    </div>
+                                    <div class="p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-red-300 text-xs font-mono">
+                                        ⚠️ Threat Detected: "Scary Monsters"
+                                    </div>
+                                    <div class="flex justify-center">
+                                        <svg class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                    </div>
+                                    <div class="p-3 bg-green-900/20 border border-green-500/30 rounded-lg text-green-300 text-xs font-mono">
+                                        ✅ Rephrased: "Silly creatures that live in caves..."
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- UNIVERSE (AI CARDS) -->
+    <section id="companions" class="py-24 max-w-7xl mx-auto px-6">
+        <div class="text-center mb-20 reveal-target">
+            <h2 class="text-4xl font-serif font-bold text-white mb-4">The Digital Constellation</h2>
+            <p class="text-slate-400 max-w-2xl mx-auto">Click a companion to start a conversation. Each has a unique personality and educational goal.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- 1. WHY (Science) -->
+            <div onclick="openAiModal('why')" class="group relative h-96 rounded-3xl overflow-hidden cursor-hover border border-white/5 hover:border-blue-500/50 transition-all duration-500 reveal-target">
+                <div class="absolute inset-0 bg-slate-900/80 group-hover:bg-blue-900/20 transition-colors z-0"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950 z-10"></div>
+                <div class="relative z-20 p-6 h-full flex flex-col justify-end">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white mb-auto shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 20V4"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-1">Why</h3>
+                    <p class="text-xs text-blue-400 font-bold uppercase tracking-wider mb-2">The Scientist</p>
+                    <p class="text-sm text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
+                        Explains how the world works, from atoms to galaxies, in simple terms.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2. CREATORYX (Story) -->
+            <div onclick="openAiModal('creatoryx')" class="group relative h-96 rounded-3xl overflow-hidden cursor-hover border border-white/5 hover:border-amber-500/50 transition-all duration-500 reveal-target" style="transition-delay: 100ms">
+                <div class="absolute inset-0 bg-slate-900/80 group-hover:bg-amber-900/20 transition-colors z-0"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950 z-10"></div>
+                <div class="relative z-20 p-6 h-full flex flex-col justify-end">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-600 flex items-center justify-center text-white mb-auto shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-1">Creatoryx</h3>
+                    <p class="text-xs text-amber-400 font-bold uppercase tracking-wider mb-2">The Storyweaver</p>
+                    <p class="text-sm text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
+                        Co-writes magical tales. Gives prompts, builds characters, and sparks creativity.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3. ISTRELLA (Emotion) -->
+            <div onclick="openAiModal('istrella')" class="group relative h-96 rounded-3xl overflow-hidden cursor-hover border border-white/5 hover:border-pink-500/50 transition-all duration-500 reveal-target" style="transition-delay: 200ms">
+                <div class="absolute inset-0 bg-slate-900/80 group-hover:bg-pink-900/20 transition-colors z-0"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950 z-10"></div>
+                <div class="relative z-20 p-6 h-full flex flex-col justify-end">
+                    <div class="w-14 h-14 rounded-2xl bg-pink-600 flex items-center justify-center text-white mb-auto shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-1">Istrella</h3>
+                    <p class="text-xs text-pink-400 font-bold uppercase tracking-wider mb-2">The Empath</p>
+                    <p class="text-sm text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
+                        Helps identify and manage big feelings. A calm friend for quiet moments.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 4. LEXICON (Language) -->
+            <div onclick="openAiModal('lexicon')" class="group relative h-96 rounded-3xl overflow-hidden cursor-hover border border-white/5 hover:border-green-500/50 transition-all duration-500 reveal-target" style="transition-delay: 300ms">
+                <div class="absolute inset-0 bg-slate-900/80 group-hover:bg-green-900/20 transition-colors z-0"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950 z-10"></div>
+                <div class="relative z-20 p-6 h-full flex flex-col justify-end">
+                    <div class="w-14 h-14 rounded-2xl bg-green-600 flex items-center justify-center text-white mb-auto shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-1">Lexicon</h3>
+                    <p class="text-xs text-green-400 font-bold uppercase tracking-wider mb-2">The Word Wizard</p>
+                    <p class="text-sm text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
+                        Teaches new languages through games. Defines difficult words instantly.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-black text-slate-500 py-16">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12 text-sm">
+            <div class="col-span-1 md:col-span-2">
+                <h3 class="text-white font-serif font-bold text-xl mb-4">iFairy Studio</h3>
+                <p class="mb-6 max-w-sm">Building the world's safest imagination engine. Where code meets kindness.</p>
+                <!-- ADMIN TRIGGER -->
+                <button id="admin-trigger" class="flex items-center gap-2 text-slate-700 hover:text-amber-500 transition-colors text-xs border border-slate-800 px-3 py-1 rounded cursor-hover">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> 
+                    Admin Settings
+                </button>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Product</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-amber-400">Features</a></li>
+                    <li><a href="#" class="hover:text-amber-400">Pricing</a></li>
+                    <li><a href="#" class="hover:text-amber-400">For Schools</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Company</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-amber-400">About Us</a></li>
+                    <li><a href="#" class="hover:text-amber-400">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-amber-400">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- AI CHAT MODAL (The Core Feature) -->
+    <div id="ai-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md hidden transition-opacity duration-300 opacity-0">
+      <div class="bg-slate-900 w-full max-w-2xl h-[700px] max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-700 relative">
+        
+        <!-- Header -->
+        <div id="ai-header" class="p-6 border-b border-white/5 flex justify-between items-center transition-colors duration-500">
+            <div class="flex items-center gap-4">
+                <div id="ai-icon" class="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"></div>
+                <div>
+                    <h3 id="ai-name" class="text-xl font-bold text-white"></h3>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider">Online</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeAiModal()" class="text-slate-400 hover:text-white p-2 hover:bg-white/10 rounded-full transition-colors cursor-hover">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat-container" class="flex-grow overflow-y-auto p-6 space-y-6 bg-slate-950/50 chat-scroll">
+            <!-- Welcome Message (Dynamic) -->
+            <div id="welcome-msg" class="flex gap-4 max-w-[80%]">
+                <div class="w-8 h-8 rounded-full bg-slate-800 flex-shrink-0 flex items-center justify-center text-xs">AI</div>
+                <div class="bg-slate-800 text-slate-200 p-4 rounded-2xl rounded-tl-none">
+                    <p id="welcome-text">Hello! I am ready to help.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 bg-slate-900 border-t border-white/5">
+            <form id="chat-form" class="flex gap-3">
+                <input type="text" id="chat-input" class="flex-grow bg-slate-950 border border-slate-700 text-white px-5 py-3 rounded-xl focus:outline-none focus:border-amber-500 transition-colors cursor-text" placeholder="Type a message..." autocomplete="off">
+                <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:scale-100 cursor-hover">
+                    <span>Send</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+                </button>
+            </form>
+            <div id="api-warning" class="hidden text-center mt-2 text-xs text-red-400">
+                Connection weak (No API Key). Showing demo response.
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN MODAL -->
+    <div id="admin-modal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 hidden">
+        <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-amber-500/20 shadow-2xl p-6">
+            <h3 class="text-xl font-serif font-bold text-white mb-4 flex items-center gap-2">
+                <svg class="text-amber-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Guardian Controls
+            </h3>
+            
+            <div id="login-view">
+                <p class="text-sm text-slate-400 mb-4">Enter Guardian Password (Demo: <strong>admin</strong>)</p>
+                <input type="password" id="admin-pass" class="w-full bg-black border border-slate-700 rounded-lg px-4 py-2 text-white mb-4 focus:border-amber-500 outline-none cursor-text">
+                <button id="login-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-lg transition-colors cursor-hover">Unlock</button>
+            </div>
+
+            <div id="settings-view" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1">Google Gemini API Key</label>
+                    <input type="text" id="api-key" class="w-full bg-black border border-slate-700 rounded-lg px-4 py-2 text-white font-mono text-sm focus:border-amber-500 outline-none cursor-text" placeholder="AIzaSy...">
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-950 rounded-lg border border-slate-800">
+                    <span class="text-sm text-slate-300">Strict Safety Mode</span>
+                    <div class="w-10 h-6 bg-green-500 rounded-full relative cursor-pointer"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow"></div></div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-950 rounded-lg border border-slate-800">
+                    <span class="text-sm text-slate-300">Demo Mode (No Key)</span>
+                    <div class="w-10 h-6 bg-slate-700 rounded-full relative cursor-pointer" id="demo-toggle" onclick="toggleDemoMode()"><div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-all" id="demo-knob"></div></div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button id="save-settings" class="flex-grow bg-amber-500 text-black font-bold py-2 rounded-lg cursor-hover">Save Changes</button>
+                    <button id="close-admin" class="px-4 py-2 text-slate-400 hover:text-white cursor-hover">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* --- 1. PARTICLE SYSTEM (MAGIC DUST) --- */
+        const canvas = document.getElementById('magic-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random();
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.opacity > 0.01) this.opacity -= 0.003;
+                else {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.opacity = 1;
+                }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(245, 158, 11, ${this.opacity})`; // Amber
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for(let i=0; i<100; i++) particles.push(new Particle());
+        }
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        initParticles();
+        animateParticles();
+
+        /* --- 2. CUSTOM CURSOR --- */
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorOutline = document.getElementById('cursor-outline');
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+            cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" });
+        });
+
+        /* --- 3. UI UTILITIES --- */
+        function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+        
+        // Scroll Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal-target').forEach(el => observer.observe(el));
+
+        // Mobile Menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.remove('pointer-events-none', 'opacity-0');
+            document.getElementById('mobile-menu').classList.add('opacity-100', 'pointer-events-auto');
+        });
+        
+        // Close mobile menu on link click
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.remove('opacity-100', 'pointer-events-auto');
+                document.getElementById('mobile-menu').classList.add('pointer-events-none', 'opacity-0');
+            });
+        });
+
+        // FAQ Accordion
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('svg');
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                content.classList.remove('active');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                content.classList.add('active');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        /* --- 3.5. CREATIVE SLIDER LOGIC --- */
+        let currentSlide = 0;
+        const totalSlides = 3;
+
+        function slideCreate(direction) {
+            currentSlide += direction;
+            if(currentSlide < 0) currentSlide = totalSlides - 1;
+            if(currentSlide >= totalSlides) currentSlide = 0;
+            
+            updateSlideUI();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlideUI();
+        }
+
+        function updateSlideUI() {
+            const track = document.getElementById('create-track');
+            const offset = -(currentSlide * 100);
+            track.style.transform = `translateX(${offset}%)`;
+            
+            // Update dots
+            for(let i=0; i<totalSlides; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if(i === currentSlide) {
+                    dot.classList.remove('bg-slate-700', 'hover:bg-slate-500');
+                    dot.classList.add('bg-amber-500');
+                } else {
+                    dot.classList.add('bg-slate-700', 'hover:bg-slate-500');
+                    dot.classList.remove('bg-amber-500');
+                }
+            }
+
+            // Fix canvas size if sketchpad becomes visible
+            if(currentSlide === 0) {
+                setTimeout(resizePad, 550); 
+            }
+        }
+
+        /* --- 4. MAGIC SKETCHPAD LOGIC --- */
+        const pad = document.getElementById('sketchpad');
+        const padCtx = pad.getContext('2d');
+        const drawHint = document.getElementById('draw-hint');
+        let painting = false;
+        
+        // Brush settings
+        let currentBrushColor = '#fbbf24'; // default amber
+        let currentBrushSize = 4;
+
+        // Resize canvas correctly
+        function resizePad() {
+            if(!pad || !pad.parentElement) return;
+            const rect = pad.parentElement.getBoundingClientRect();
+            if(rect.width > 0 && rect.height > 0) {
+                pad.width = rect.width;
+                pad.height = rect.height;
+            }
+        }
+        window.addEventListener('resize', resizePad);
+        setTimeout(resizePad, 100); // Initial resize
+
+        function startPosition(e) {
+            painting = true;
+            drawHint.style.opacity = '0'; // Hide text when drawing starts
+            draw(e);
+        }
+        function finishedPosition() {
+            painting = false;
+            padCtx.beginPath();
+        }
+        function draw(e) {
+            if (!painting) return;
+            const rect = pad.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            padCtx.lineWidth = currentBrushSize;
+            padCtx.lineCap = 'round';
+            padCtx.strokeStyle = currentBrushColor;
+            padCtx.shadowColor = currentBrushColor;
+            padCtx.shadowBlur = 15;
+
+            padCtx.lineTo(x, y);
+            padCtx.stroke();
+            padCtx.beginPath();
+            padCtx.moveTo(x, y);
+            
+            // Add sparkles (only if width is small to med to avoid clutter)
+            if(Math.random() > 0.9 && currentBrushSize < 10) {
+                padCtx.fillStyle = '#fff';
+                padCtx.fillRect(x + (Math.random()*10 -5), y + (Math.random()*10 -5), 2, 2);
+            }
+        }
+
+        pad.addEventListener('mousedown', startPosition);
+        pad.addEventListener('mouseup', finishedPosition);
+        pad.addEventListener('mousemove', draw);
+        
+        // Touch support for pad
+        pad.addEventListener('touchstart', (e) => { startPosition(e.touches[0]); e.preventDefault(); });
+        pad.addEventListener('touchend', finishedPosition);
+        pad.addEventListener('touchmove', (e) => { draw(e.touches[0]); e.preventDefault(); });
+
+        function clearSketchpad() {
+            padCtx.clearRect(0, 0, pad.width, pad.height);
+            drawHint.style.opacity = '1';
+        }
+        
+        function setBrushColor(color, btn) {
+            currentBrushColor = color;
+            // Update UI
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setBrushSize(size, btn) {
+            currentBrushSize = size;
+            // Update UI
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function downloadSketch() {
+            const link = document.createElement('a');
+            link.download = 'my-magic-drawing.png';
+            link.href = pad.toDataURL();
+            link.click();
+        }
+
+        async function analyzeSketch() {
+            const btn = document.getElementById('analyze-btn');
+            const overlay = document.getElementById('sketch-overlay');
+            const resultText = document.getElementById('sketch-result-text');
+
+            // 1. Get Image
+            const dataUrl = pad.toDataURL('image/png');
+            const base64Image = dataUrl.split(',')[1]; // Remove header
+
+            // 2. UI Loading
+            btn.innerHTML = `<span>Magic in progress...</span>`;
+            btn.disabled = true;
+
+            try {
+                // 3. Call API
+                let story = "";
+                if(apiKey) {
+                    const prompt = "Look at this drawing. Describe what you see in a whimsical, magical way for a child, as if you are a fairy discovering it. Keep it under 2 sentences.";
+                    story = await callGemini(prompt, null, base64Image); // Sending image!
+                } else {
+                    await new Promise(r => setTimeout(r, 1500)); // Fake delay
+                    story = "I see a glimmering star! It looks like it fell from the sky to grant a wish. (Demo Mode)";
+                }
+
+                // 4. Show Result
+                resultText.innerText = story;
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+
+            } catch(e) {
+                console.error(e);
+                alert("The magic dust settled... try again!");
+            } finally {
+                btn.innerHTML = `<span>Read the Stars ✨</span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`;
+                btn.disabled = false;
+            }
+        }
+
+        function closeSketchOverlay() {
+            document.getElementById('sketch-overlay').classList.add('opacity-0', 'pointer-events-none');
+            clearSketchpad();
+        }
+
+        /* --- 4.5 NEW SIMULATION TOOLS --- */
+        function simulateMelody() {
+            const input = document.getElementById('melody-input');
+            const status = document.getElementById('melody-status');
+            const visual = document.getElementById('melody-visual');
+            const waves = document.getElementById('melody-waves');
+            
+            if(!input.value) { input.focus(); return; }
+            
+            // Animation
+            status.innerText = "Composing...";
+            visual.classList.add('scale-0');
+            setTimeout(() => {
+                visual.style.display = 'none';
+                waves.classList.remove('hidden');
+                status.innerText = "Playing: " + input.value;
+                
+                // Reset after 3s
+                setTimeout(() => {
+                    visual.style.display = 'flex';
+                    setTimeout(() => visual.classList.remove('scale-0'), 50);
+                    waves.classList.add('hidden');
+                    status.innerText = "Turn Feelings into Music";
+                    input.value = "";
+                }, 3000);
+            }, 500);
+        }
+
+        function simulateEco(type) {
+            const world = document.getElementById('eco-world');
+            const status = document.getElementById('eco-status');
+            const icon = document.getElementById('eco-icon');
+            
+            if(type === 'sun') {
+                world.style.backgroundColor = '#0f172a'; // Reset
+                setTimeout(() => world.style.backgroundColor = '#1e293b', 100);
+                status.innerText = "It's a sunny day!";
+                icon.innerHTML = '☀️';
+            } else if (type === 'rain') {
+                world.style.backgroundColor = '#1e3a8a';
+                status.innerText = "Rain is falling...";
+                icon.innerHTML = '🌧️';
+            } else if (type === 'tree') {
+                world.style.backgroundColor = '#064e3b';
+                status.innerText = "A forest grows!";
+                icon.innerHTML = '🌳';
+            }
+            
+            // Reset icon after delay
+            setTimeout(() => {
+                world.style.backgroundColor = '#020617';
+                status.innerText = "Build Living Worlds";
+                icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-green-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M8 11h8"/><path d="M12 11v4"/></svg>`;
+            }, 2000);
+        }
+
+        /* --- 5. DREAM WEAVER & RIDDLE LOGIC --- */
+        async function weaveDream() {
+            const btn = document.getElementById('dream-btn');
+            const outputDiv = document.getElementById('dream-output');
+            const textEl = document.getElementById('dream-text');
+            
+            const name = document.getElementById('dream-name').value.trim() || "The Hero";
+            const setting = document.getElementById('dream-setting').value;
+            const sidekick = document.getElementById('dream-sidekick').value;
+
+            btn.innerHTML = "Weaving Magic... 🪄";
+            btn.disabled = true;
+            outputDiv.classList.add('hidden');
+
+            try {
+                let story = "";
+                if(apiKey) {
+                    const prompt = `Write a very short, magical bedtime story (max 3 sentences) about a hero named ${name} who explores ${setting} with their friend, a ${sidekick}. Keep it sweet and safe for a 5-year-old.`;
+                    story = await callGemini(prompt, "You are a gentle storyteller.");
+                } else {
+                    await new Promise(r => setTimeout(r, 1500));
+                    story = `Once upon a time in ${setting}, ${name} and their best friend the ${sidekick} found a glowing treasure chest. Inside was a note that said "You are loved!" They smiled and hugged. (Demo Mode)`;
+                }
+                
+                outputDiv.classList.remove('hidden');
+                textEl.innerText = story;
+            } catch(e) {
+                alert("The story threads got tangled. Try again!");
+            } finally {
+                btn.innerHTML = "Weave Story ✨";
+                btn.disabled = false;
+            }
+        }
+
+        let currentRiddleAnswer = "";
+
+        async function generateRiddle() {
+            const btn = document.getElementById('riddle-btn');
+            const display = document.getElementById('riddle-text');
+            const inputArea = document.getElementById('riddle-input-area');
+            const feedback = document.getElementById('riddle-feedback');
+
+            btn.disabled = true;
+            btn.innerHTML = "Summoning...";
+            inputArea.classList.add('hidden');
+            feedback.innerText = "";
+            document.getElementById('riddle-guess').value = "";
+
+            try {
+                let riddleText = "";
+                if(apiKey) {
+                    // Asking for format: "Riddle Text|Answer"
+                    const prompt = "Generate a simple riddle for a child about an animal or object. Format it exactly like this: [Riddle Question] | [One Word Answer]";
+                    const raw = await callGemini(prompt, "You are a riddle master.");
+                    const parts = raw.split('|');
+                    riddleText = parts[0];
+                    currentRiddleAnswer = parts.length > 1 ? parts[1].trim() : "Unknown";
+                } else {
+                    await new Promise(r => setTimeout(r, 1000));
+                    riddleText = "I have keys but no locks. I have a space but no room. You can enter, but never go outside. What am I? (Demo Mode)";
+                    currentRiddleAnswer = "Keyboard";
+                }
+
+                display.innerText = riddleText;
+                inputArea.classList.remove('hidden', 'opacity-0');
+            } catch(e) {
+                display.innerText = "The riddle vanished!";
+            } finally {
+                btn.innerHTML = "Summon Riddle 🎲";
+                btn.disabled = false;
+            }
+        }
+
+        async function checkRiddle() {
+            const guess = document.getElementById('riddle-guess').value.trim();
+            const feedback = document.getElementById('riddle-feedback');
+            
+            if(!guess) return;
+
+            feedback.className = "text-center text-sm mt-2 font-bold min-h-[20px] text-slate-400";
+            feedback.innerText = "Consulting the oracle...";
+
+            try {
+                let isCorrect = false;
+                if(apiKey) {
+                    const prompt = `The riddle answer is "${currentRiddleAnswer}". The user guessed "${guess}". Is this correct? Reply with exactly YES or NO.`;
+                    const response = await callGemini(prompt, "You are a judge.");
+                    isCorrect = response.toLowerCase().includes('yes');
+                } else {
+                    isCorrect = guess.toLowerCase() === currentRiddleAnswer.toLowerCase();
+                }
+
+                if(isCorrect) {
+                    feedback.innerText = "🎉 Correct! You are brilliant!";
+                    feedback.className = "text-center text-sm mt-2 font-bold min-h-[20px] text-green-400";
+                } else {
+                    feedback.innerText = "❌ Not quite. Try again!";
+                    feedback.className = "text-center text-sm mt-2 font-bold min-h-[20px] text-red-400";
+                }
+            } catch(e) {
+                feedback.innerText = "Error checking answer.";
+            }
+        }
+
+
+        /* --- 6. AI LOGIC (THE BRAIN) --- */
+        let apiKey = localStorage.getItem('ifairy_key') || '';
+        let demoMode = true; // Default to true for better UX if no key
+        let currentPersona = null;
+
+        const personas = {
+            why: {
+                name: "Why",
+                color: "bg-blue-600",
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>`,
+                welcome: "I am ready to explain the universe! What are you curious about?",
+                system: "You are 'Why', a science fairy robot. Explain complex topics simply for a 7-year-old. Be accurate but use analogies. Use blue/science emojis."
+            },
+            creatoryx: {
+                name: "Creatoryx",
+                color: "bg-amber-600",
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 7 10 5 10-5"/></svg>`,
+                welcome: "The library is open. Shall we weave a tale of dragons or spaceships?",
+                system: "You are Creatoryx, a storyweaver. Help the user write a story. Ask 'What happens next?' frequently. Be whimsical."
+            },
+            istrella: {
+                name: "Istrella",
+                color: "bg-pink-600",
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
+                welcome: "I'm here to listen. How is your heart feeling today?",
+                system: "You are Istrella, an emotional support fairy. Validate feelings. Offer breathing exercises or calm thoughts. Be gentle."
+            },
+            lexicon: {
+                name: "Lexicon",
+                color: "bg-green-600",
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>`,
+                welcome: "Salut! Hola! Hello! Give me a word, and I shall unveil its secrets.",
+                system: "You are Lexicon, a language teacher. Define words or translate phrases. Make it fun with rhymes or trivia."
+            }
+        };
+
+        function openAiModal(id) {
+            currentPersona = personas[id];
+            const modal = document.getElementById('ai-modal');
+            const header = document.getElementById('ai-header');
+            const icon = document.getElementById('ai-icon');
+            
+            // Setup UI
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            
+            document.getElementById('ai-name').innerText = currentPersona.name;
+            document.getElementById('welcome-text').innerText = currentPersona.welcome;
+            icon.innerHTML = currentPersona.icon;
+            icon.className = `w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg ${currentPersona.color}`;
+            header.className = `p-6 border-b border-white/5 flex justify-between items-center transition-colors duration-500 ${currentPersona.color.replace('bg-', 'bg-opacity-20 ')}`; 
+
+            // Clear chat except welcome
+            const container = document.getElementById('chat-container');
+            while(container.children.length > 1) { container.removeChild(container.lastChild); }
+        }
+
+        function closeAiModal() {
+            const modal = document.getElementById('ai-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // Chat Logic
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatContainer = document.getElementById('chat-container');
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = chatInput.value.trim();
+            if(!text) return;
+
+            // 1. Add User Message
+            addMessage(text, 'user');
+            chatInput.value = '';
+
+            // 2. Add Loading Bubble
+            const loadingId = addLoadingBubble();
+            scrollToBottom();
+
+            // Check API or Demo Mode logic is implicit in try/catch block now
+            // But we can show a warning if key is missing
+            if(!apiKey && !demoMode) {
+                 // Should not happen as demoMode defaults to true
+            } else if (!apiKey && demoMode) {
+                document.getElementById('api-warning').classList.remove('hidden');
+            } else {
+                document.getElementById('api-warning').classList.add('hidden');
+            }
+
+            try {
+                // 3. Call API or Demo
+                let response;
+                if(apiKey) {
+                    response = await callGemini(text, currentPersona.system);
+                } else {
+                    response = await simulateAIResponse(text);
+                }
+                
+                // 4. Remove Loading, Add AI Message
+                document.getElementById(loadingId).remove();
+                addMessage(response, 'ai', true); 
+            } catch (err) {
+                document.getElementById(loadingId).remove();
+                addMessage("My magic connection is weak right now. Please try again.", 'ai');
+                console.error(err);
+            }
+        });
+
+        // Inspiration Generator Logic
+        async function generateSuggestion() {
+            const chatInput = document.getElementById('chat-input');
+            chatInput.placeholder = "Asking the fairies for ideas...";
+            
+            try {
+                let suggestion = "";
+                if(apiKey) {
+                    const prompt = `Generate a single short, fun conversation starter question for a child to ask a character who is: ${currentPersona.system}. Keep it under 10 words.`;
+                    suggestion = await callGemini(prompt, "You are a creative muse helper.");
+                } else {
+                    suggestion = "Tell me a secret about the moon! (Demo Mode)";
+                }
+                
+                // Typing effect for the input box
+                chatInput.value = "";
+                let i = 0;
+                const typeInterval = setInterval(() => {
+                    chatInput.value += suggestion.charAt(i);
+                    i++;
+                    if(i >= suggestion.length) clearInterval(typeInterval);
+                }, 30);
+                
+            } catch(e) {
+                chatInput.placeholder = "Type a message...";
+            }
+        }
+
+        function addMessage(text, sender, animate = false) {
+            const div = document.createElement('div');
+            const isAI = sender === 'ai';
+            
+            div.className = `flex gap-4 max-w-[80%] ${isAI ? '' : 'ml-auto flex-row-reverse'}`;
+            
+            let avatar = '';
+            if(isAI) {
+                avatar = `<div class="w-8 h-8 rounded-full ${currentPersona.color} flex-shrink-0 flex items-center justify-center text-xs shadow-lg shadow-${currentPersona.color.split('-')[1]}-500/50">${currentPersona.name[0]}</div>`;
+            } else {
+                avatar = `<div class="w-8 h-8 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center text-xs">Me</div>`;
+            }
+
+            // Simple markdown parsing for bold
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            div.innerHTML = `
+                ${avatar}
+                <div class="${isAI ? 'bg-slate-800 text-slate-200' : 'bg-amber-600 text-white'} p-4 rounded-2xl ${isAI ? 'rounded-tl-none' : 'rounded-tr-none'} shadow-md text-sm leading-relaxed">
+                    <p>${animate ? '' : formattedText}</p>
+                </div>
+            `;
+            
+            chatContainer.appendChild(div);
+            scrollToBottom();
+
+            if(animate) {
+                const p = div.querySelector('p');
+                typeText(p, formattedText);
+            }
+        }
+
+        function addLoadingBubble() {
+            const id = 'loading-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = `flex gap-4 max-w-[80%]`;
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${currentPersona.color} flex-shrink-0 flex items-center justify-center text-xs opacity-50">${currentPersona.name[0]}</div>
+                <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none flex gap-1 items-center h-12">
+                    <div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div>
+                    <div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div>
+                    <div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div>
+                </div>
+            `;
+            chatContainer.appendChild(div);
+            return id;
+        }
+
+        function typeText(element, text) {
+            // Simplified typing effect
+            element.innerHTML = text; 
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function callGemini(prompt, system, imageBase64 = null) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            
+            // Construct parts (Multimodal support)
+            const parts = [{ text: prompt }];
+            if (imageBase64) {
+                parts.push({ inline_data: { mime_type: "image/png", data: imageBase64 } });
+            }
+
+            const body = {
+                contents: [{ parts: parts }]
+            };
+            
+            if(system) {
+                body.systemInstruction = { parts: [{ text: system }] };
+            }
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+
+            if(!res.ok) throw new Error('API Error');
+            const data = await res.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+
+        // Mock response for Demo Mode
+        function simulateAIResponse(input) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const responses = [
+                        "That is a magical question! **Did you know?** The stars you see might not even be there anymore!",
+                        "I love how your mind works. Let's imagine a world where trees are made of candy.",
+                        "That sounds important. Remember, it's okay to feel big feelings like that.",
+                        "In French, we say 'C'est magnifique!' which means 'It is magnificent!'"
+                    ];
+                    resolve(responses[Math.floor(Math.random() * responses.length)] + " (Demo Mode)");
+                }, 1500);
+            });
+        }
+
+        /* --- 7. ADMIN LOGIC --- */
+        const adminModal = document.getElementById('admin-modal');
+        const loginView = document.getElementById('login-view');
+        const settingsView = document.getElementById('settings-view');
+
+        document.getElementById('admin-trigger').addEventListener('click', () => {
+            adminModal.classList.remove('hidden');
+            loginView.classList.remove('hidden');
+            settingsView.classList.add('hidden');
+        });
+
+        document.getElementById('login-btn').addEventListener('click', () => {
+            if(document.getElementById('admin-pass').value === 'admin') {
+                loginView.classList.add('hidden');
+                settingsView.classList.remove('hidden');
+                document.getElementById('api-key').value = apiKey;
+                updateDemoToggleUI();
+            } else {
+                alert('Wrong password');
+            }
+        });
+
+        document.getElementById('save-settings').addEventListener('click', () => {
+            apiKey = document.getElementById('api-key').value.trim();
+            localStorage.setItem('ifairy_key', apiKey);
+            alert('Settings Saved');
+            adminModal.classList.add('hidden');
+        });
+
+        document.getElementById('close-admin').addEventListener('click', () => {
+            adminModal.classList.add('hidden');
+        });
+
+        function toggleDemoMode() {
+            demoMode = !demoMode;
+            updateDemoToggleUI();
+        }
+
+        function updateDemoToggleUI() {
+            const knob = document.getElementById('demo-knob');
+            const bg = document.getElementById('demo-toggle');
+            if(demoMode) {
+                bg.classList.replace('bg-slate-700', 'bg-amber-500');
+                knob.style.transform = 'translateX(100%)';
+            } else {
+                bg.classList.replace('bg-amber-500', 'bg-slate-700');
+                knob.style.transform = 'translateX(0)';
+            }
+        }
+
+    </script>
+</body>
+</html>
