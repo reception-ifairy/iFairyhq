@@ -1,0 +1,22 @@
+{
+  "name": "ifairy-studio",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [3000, 8787, 3306],
+  "portsAttributes": {
+    "3000": { "label": "Vite dev server", "onAutoForward": "openBrowser" },
+    "8787": { "label": "API server" },
+    "3306": { "label": "MariaDB (dev)" }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}

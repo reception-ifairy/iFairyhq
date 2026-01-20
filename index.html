@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iFairy Studio | The Future of Edutainment</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --purple-glow: rgba(168, 85, 247, 0.4);
+        --indigo-glow: rgba(99, 102, 241, 0.4);
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #05020a;
+        color: #f3e8ff;
+        scroll-behavior: smooth;
+      }
+      .font-serif {
+        font-family: 'Playfair Display', serif;
+      }
+      @keyframes gradient-x {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      .animate-gradient-x {
+        background-size: 200% 200%;
+        animation: gradient-x 15s ease infinite;
+      }
+      .animate-pulse-slow {
+        animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes glow-pulse {
+        0%, 100% {
+          box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), inset 0 0 10px rgba(168, 85, 247, 0.1);
+          border-color: rgba(168, 85, 247, 0.2);
+        }
+        50% {
+          box-shadow: 0 0 45px rgba(168, 85, 247, 0.6), inset 0 0 15px rgba(168, 85, 247, 0.3);
+          border-color: rgba(168, 85, 247, 0.5);
+        }
+      }
+      .animate-glow-pulse {
+        animation: glow-pulse 4s ease-in-out infinite;
+      }
+      @keyframes fade-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-up {
+        animation: fade-up 0.8s ease-out forwards;
+      }
+      .glass {
+        background: rgba(15, 8, 24, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(168, 85, 247, 0.1);
+      }
+      .text-glow {
+        text-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+      }
+      
+      /* Advanced Lighting Effects */
+      .card-light {
+        position: relative;
+        overflow: hidden;
+      }
+      .card-light::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at center, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .card-light:hover::before {
+        opacity: 1;
+      }
+      
+      .border-glow {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background-clip: padding-box;
+      }
+      .border-glow:hover {
+        border-color: rgba(168, 85, 247, 0.4);
+        box-shadow: 0 0 30px rgba(168, 85, 247, 0.15);
+      }
+
+      @keyframes shine {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(200%) translateY(200%) rotate(45deg); }
+      }
+      .shine-effect {
+        position: relative;
+        overflow: hidden;
+      }
+      .shine-effect::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to bottom right,
+          transparent,
+          rgba(255, 255, 255, 0.05),
+          transparent
+        );
+        animation: shine 8s infinite linear;
+        pointer-events: none;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #05020a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #1e1b4b;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #312e81;
+      }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+        "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+      }
+    }
+    </script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

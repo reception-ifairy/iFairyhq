@@ -1,0 +1,21 @@
+Options -Indexes
+
+<FilesMatch "^\\.env">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Don’t allow browsing dependencies if this directory is web-accessible.
+  RewriteRule ^node_modules/ - [F,L]
+
+  # Serve the production build from /dist without changing DocumentRoot.
+  RewriteCond %{DOCUMENT_ROOT}/dist%{REQUEST_URI} -f [OR]
+  RewriteCond %{DOCUMENT_ROOT}/dist%{REQUEST_URI} -d
+  RewriteRule ^(.*)$ dist/$1 [L]
+
+  # SPA fallback (React Router / client-side routing).
+  RewriteRule ^ dist/index.html [L]
+</IfModule>
+

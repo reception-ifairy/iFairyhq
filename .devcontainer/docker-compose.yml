@@ -1,0 +1,44 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm
+    volumes:
+      - ..:/workspaces/${localWorkspaceFolderBasename}:cached
+    working_dir: /workspaces/${localWorkspaceFolderBasename}
+    command: sleep infinity
+    environment:
+      # API server defaults (safe for dev in Codespaces)
+      PORT: "8787"
+      ADMIN_API_TOKEN: "dev-token-change-me"
+      ADMIN_SESSION_SECRET: "dev-session-secret-change-me"
+      ENCRYPTION_KEY: "dev-encryption-key-change-me-please-32chars"
+      BASE_URL: "http://localhost:3000"
+
+      # MySQL/MariaDB (service below)
+      DB_HOST: "db"
+      DB_USER: "ifairy"
+      DB_PASSWORD: "ifairy"
+      DB_NAME: "admin_ifairycouk"
+      DB_PORT: "3306"
+    ports:
+      - "3000:3000"
+      - "8787:8787"
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: admin_ifairycouk
+      MYSQL_USER: ifairy
+      MYSQL_PASSWORD: ifairy
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ifairy-db:/var/lib/mysql
+      - ../schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "3306:3306"
+
+volumes:
+  ifairy-db:
+
