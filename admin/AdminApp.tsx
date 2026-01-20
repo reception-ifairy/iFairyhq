@@ -22,7 +22,32 @@ interface AdminUser {
 }
 
 // Login Screen Component
-const LoginScreen: React.FC = () => {
+const LoginScreen: React.FC<{ onDevLogin: () => void }> = ({ onDevLogin }) => {
+  const [showDevLogin, setShowDevLogin] = useState(false);
+  const [token, setToken] = useState('');
+  const [error, setError] = useState('');
+
+  const handleDevLogin = async () => {
+    if (!token.trim()) {
+      setError('Wpisz token');
+      return;
+    }
+    // Test token by calling API
+    try {
+      const res = await fetch('/api/health', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        localStorage.setItem('admin_api_token', token);
+        onDevLogin();
+      } else {
+        setError('Nieprawidlowy token');
+      }
+    } catch {
+      setError('Blad polaczenia');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#010103] flex items-center justify-center p-6">
       <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
@@ -62,6 +87,35 @@ const LoginScreen: React.FC = () => {
               </svg>
               Zaloguj przez GitHub
             </a>
+
+            {/* Dev Login with Token */}
+            <div className="pt-4 border-t border-white/10">
+              <button
+                onClick={() => setShowDevLogin(!showDevLogin)}
+                className="text-white/30 hover:text-white text-xs transition-colors"
+              >
+                {showDevLogin ? '▲ Ukryj' : '▼ Dev Login (Token)'}
+              </button>
+              
+              {showDevLogin && (
+                <div className="mt-4 space-y-3">
+                  <input
+                    type="password"
+                    value={token}
+                    onChange={(e) => setToken(e.target.value)}
+                    placeholder="ADMIN_API_TOKEN"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-sm"
+                  />
+                  {error && <p className="text-red-400 text-xs">{error}</p>}
+                  <button
+                    onClick={handleDevLogin}
+                    className="w-full px-4 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all"
+                  >
+                    Zaloguj przez Token
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           
           <div className="pt-4 text-[10px] text-white/20">
@@ -143,8 +197,17 @@ export const AdminApp: React.FC = () => {
   const [authState, setAuthState] = useState<'loading' | 'logged-in' | 'logged-out'>('loading');
   const [user, setUser] = useState<AdminUser | null>(null);
 
-  // Check session on mount
-  useEffect(() => {
+  const checkAuth = () => {
+    // First check if we have a token in localStorage (dev mode)
+    const token = localStorage.getItem('admin_api_token');
+    if (token) {
+      // Token exists - use it for API calls, fake user for UI
+      setUser({ id: 'dev', email: 'dev@localhost', full_name: 'Dev User', role: 'admin' });
+      setAuthState('logged-in');
+      return;
+    }
+
+    // Otherwise check session cookie
     fetch('/api/me', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
@@ -156,6 +219,11 @@ export const AdminApp: React.FC = () => {
         }
       })
       .catch(() => setAuthState('logged-out'));
+  };
+
+  // Check session on mount
+  useEffect(() => {
+    checkAuth();
   }, []);
 
   useEffect(() => {
@@ -167,9 +235,14 @@ export const AdminApp: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
+    localStorage.removeItem('admin_api_token');
     await fetch('/api/logout', { method: 'POST', credentials: 'include' });
     setAuthState('logged-out');
     setUser(null);
+  };
+
+  const handleDevLogin = () => {
+    checkAuth();
   };
 
   // Show loading screen while checking session
@@ -179,7 +252,7 @@ export const AdminApp: React.FC = () => {
 
   // Show login screen if not authenticated
   if (authState === 'logged-out') {
-    return <LoginScreen />;
+    return <LoginScreen onDevLogin={handleDevLogin} />;
   }
 
   const nav: NavItem[] = [
